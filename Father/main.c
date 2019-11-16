@@ -1,3 +1,6 @@
+
+#define _CRT_SECURE_NO_WARNINGS
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -12,9 +15,13 @@ void CreateProcessSimpleMain(void);
 int main(int argc, char** argv)
 {
 	int braket_stack[256];
-
+	char expression_first_part[256];
+	char expression_last_part[256];
+	char result_string[256];
+	char sub_solution[256];
 	char* expression = argv[1];
 	int i = 0;
+	int result = 0;
 	int stack_index = -1;
 	int expression_start = 0;
 	int expression_end = 0; 
@@ -37,7 +44,19 @@ int main(int argc, char** argv)
 			child_expression = (char*)malloc(child_expression_size * sizeof(char));
 			strncpy_s(child_expression,child_expression_size, 
 				expression[expression_start+1], child_expression_size - 1);
+			
+			//result = CreateProcessSimpleMain(child_expression); - the function doesn't return int
+			result = 15; //check
 
+			printf("%d\n", result);
+
+			//create string with sub expression
+			strncpy(expression_first_part, expression, expression_start);
+			strcat(sub_solution, expression_first_part);
+			sprintf(result_string, "%d", result);
+			strcat(sub_solution, result_string);
+			strncpy(expression_last_part, expression + expression_end, strlen(expression) - expression_end - 1);
+			//write to file
 		}
 
 	}
