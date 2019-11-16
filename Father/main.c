@@ -35,6 +35,8 @@ void solveExpression(char* expression)
 	char* number_string = NULL;
 	int value = 0;
 
+	int child_expression_result = 0;
+
 	int expression_start = 0;
 	int expression_end = 0;
 	char* child_expression = NULL;
@@ -69,6 +71,11 @@ void solveExpression(char* expression)
 		}
 		else if (expression[i] == ')')
 		{
+			// Closing brace encountered, solve entire brace
+			while (expression[peek(operator_index_stack)] != '(')
+			{
+
+			}
 			expression_start = pop(&bracket_index_stack);
 			expression_end = i;
 			child_expression_size = expression_end - expression_start;
