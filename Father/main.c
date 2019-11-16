@@ -1,3 +1,6 @@
+
+#define _CRT_SECURE_NO_WARNINGS
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -11,6 +14,10 @@ int CreateProcessSimpleMain(char* expression);
 
 char* solveSimpleExpression(char* expression)
 {
+	char result_string[256];
+	char expression_first_part[256];
+	char expression_last_part[256];
+
 	int braket_stack[256];
 	int i = 0;
 	int stack_index = -1;
@@ -20,6 +27,7 @@ char* solveSimpleExpression(char* expression)
 	int child_expression_size = 0;
 	int result;
 	char* new_expression = NULL;
+	
 
 	while (expression[i] != '\0')
 	{
@@ -42,7 +50,11 @@ char* solveSimpleExpression(char* expression)
 			printf("%d\n", result);
 
 			// Build new string with solution
-
+			//copy first part
+			sprintf(result_string, "%d", result);
+			//copy second part
+			//copy last part
+			//write to file +\n
 			
 			break;
 		}
@@ -56,7 +68,7 @@ char* solveSimpleExpression(char* expression)
 int main(int argc, char** argv)
 {
 	char* expression = argv[1];
-
+	solveSimpleExpression(expression);
 	
 }
 
