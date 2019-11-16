@@ -25,19 +25,16 @@ void push(node_t** stack, int data)
 
 	node_t* new_node = create_node(data);
 
-	if (is_empty(stack))
-		stack = new_node;
-
 	new_node->next = *stack;
 	*stack = new_node;
 }
 
 int pop(node_t** stack)
 {
-	if (is_empty(stack))
+	if (is_empty(*stack))
 		return INT_MIN;
 
-	node_t* temp = stack;
+	node_t* temp = *stack;
 	*stack = (*stack)->next;
 	int popped = temp->data;
 	free(temp);

@@ -20,6 +20,7 @@ int main(int argc, char** argv)
 	char result_string[256];
 	char sub_solution[256];
 	char* expression = argv[1];
+	
 	int i = 0;
 	int result = 0;
 	int stack_index = -1;
