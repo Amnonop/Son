@@ -10,7 +10,7 @@
 #define BRUTAL_TERMINATION_CODE 0x55
 
 BOOL CreateProcessSimple(LPTSTR CommandLine, PROCESS_INFORMATION *ProcessInfoPtr);
-void CreateProcessSimpleMain(void);
+int CreateProcessSimpleMain(void);
 
 int main(int argc, char** argv)
 {
@@ -27,6 +27,9 @@ int main(int argc, char** argv)
 	int expression_end = 0; 
 	char* child_expression = NULL;
 	int child_expression_size=0;
+	//opening file and earasing previous content if needed
+	openFile("result_file.txt");
+
 	while (argv[i] != '\0')
 	{
 		if (argv[i] == '(')
@@ -56,7 +59,10 @@ int main(int argc, char** argv)
 			sprintf(result_string, "%d", result);
 			strcat(sub_solution, result_string);
 			strncpy(expression_last_part, expression + expression_end, strlen(expression) - expression_end - 1);
-			//write to file
+			strcat(sub_solution, expression_last_part);
+			strcat(sub_solution, "\n");
+			//append to file
+			appendToFile("result_file.txt", sub_solution);
 		}
 
 	}
@@ -65,7 +71,7 @@ int main(int argc, char** argv)
 
 
 
-void CreateProcessSimpleMain(char* expression)
+int CreateProcessSimpleMain(char* expression)
 {
 	PROCESS_INFORMATION procinfo;
 	DWORD				waitcode;
@@ -118,6 +124,7 @@ void CreateProcessSimpleMain(char* expression)
 
 	CloseHandle(procinfo.hProcess); /* Closing the handle to the process */
 	CloseHandle(procinfo.hThread); /* Closing the handle to the main thread of the process */
+	return exitcode;
 }
 
 BOOL CreateProcessSimple(LPTSTR CommandLine, PROCESS_INFORMATION *ProcessInfoPtr)
