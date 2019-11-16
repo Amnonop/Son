@@ -7,46 +7,56 @@
 #define BRUTAL_TERMINATION_CODE 0x55
 
 BOOL CreateProcessSimple(LPTSTR CommandLine, PROCESS_INFORMATION *ProcessInfoPtr);
-void CreateProcessSimpleMain(void);
+int CreateProcessSimpleMain(char* expression);
+void solveExpression(char* expression);
 
 int main(int argc, char** argv)
 {
+	char* expression = argv[1];
+	
+	solveExpression(expression);
+	
+	return 1;
+}
+
+void solveExpression(char* expression)
+{
 	int braket_stack[256];
 
-	char* expression = argv[1];
 	int i = 0;
 	int stack_index = -1;
 	int expression_start = 0;
-	int expression_end = 0; 
+	int expression_end = 0;
 	char* child_expression = NULL;
-	int child_expression_size=0;
-	while (argv[i] != '\0')
+	int child_expression_size = 0;
+	while (expression[i] != '\0')
 	{
-		if (argv[i] == '(')
+		if (expression[i] == '(')
 		{
 			stack_index++;
 			braket_stack[stack_index] = i;
 			i++;
 		}
-		else if (argv[i] == ')')
+		else if (expression[i] == ')')
 		{
 			expression_start = braket_stack[stack_index];
 			stack_index--;
 			expression_end = i;
 			child_expression_size = expression_end - expression_start;
 			child_expression = (char*)malloc(child_expression_size * sizeof(char));
-			strncpy_s(child_expression,child_expression_size, 
-				expression[expression_start+1], child_expression_size - 1);
-
+			strncpy_s(child_expression, child_expression_size,
+				expression + expression_start + 1, child_expression_size - 1);
 		}
-
+		else
+		{
+			i++;
+		}
 	}
-
 }
 
 
 
-void CreateProcessSimpleMain(char* expression)
+int CreateProcessSimpleMain(char* expression)
 {
 	PROCESS_INFORMATION procinfo;
 	DWORD				waitcode;
@@ -99,6 +109,8 @@ void CreateProcessSimpleMain(char* expression)
 
 	CloseHandle(procinfo.hProcess); /* Closing the handle to the process */
 	CloseHandle(procinfo.hThread); /* Closing the handle to the main thread of the process */
+
+	return exitcode;
 }
 
 BOOL CreateProcessSimple(LPTSTR CommandLine, PROCESS_INFORMATION *ProcessInfoPtr)
