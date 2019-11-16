@@ -35,6 +35,10 @@ void solveExpression(char* expression)
 	char* number_string = NULL;
 	int value = 0;
 
+	char operator = ' ';
+	int first_operand = 0;
+	int second_operand = 0;
+
 	int child_expression_result = 0;
 
 	int expression_start = 0;
@@ -74,14 +78,13 @@ void solveExpression(char* expression)
 			// Closing brace encountered, solve entire brace
 			while (expression[peek(operator_index_stack)] != '(')
 			{
+				operator = expression[pop(operator_index_stack)];
+				first_operand = pop(values_stack);
+				second_operand = pop(values_stack);
+				// Solve simple expression
 
+				push(values_stack, child_expression_result);
 			}
-			expression_start = pop(&bracket_index_stack);
-			expression_end = i;
-			child_expression_size = expression_end - expression_start;
-			child_expression = (char*)malloc(child_expression_size * sizeof(char));
-			strncpy_s(child_expression, child_expression_size,
-				expression + expression_start + 1, child_expression_size - 1);
 		}
 	}
 }
