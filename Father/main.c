@@ -24,16 +24,47 @@ void solveExpression(char* expression)
 {
 	node_t* bracket_index_stack = NULL;
 
+	node_t* values_stack = NULL;
+	node_t* operator_index_stack = NULL;
+
 	int i = 0;
+	int expression_length = strlen(expression);
+
+	int number_start_index = 0;
+	int number_length = 0;
+	char* number_string = NULL;
+	int value = 0;
+
 	int expression_start = 0;
 	int expression_end = 0;
 	char* child_expression = NULL;
 	int child_expression_size = 0;
+
 	while (expression[i] != '\0')
 	{
-		if (expression[i] == '(')
+		if (expression[i] >= '0' && expression[i] <= '9')
 		{
-			push(&bracket_index_stack, i);
+			number_start_index = i;
+			while (i < expression_length && expression[i] >= '0' && expression[i] <= '9')
+			{
+				i++;
+			}
+			number_length = i - number_start_index;
+			number_string = (char*)malloc(number_length * sizeof(char));
+			strncpy_s(number_string, number_length, 
+				expression + number_start_index, number_length - 1);
+			value = (int)strtol(number_string, (char **)NULL, 10);
+			free(number_string);
+			push(&values_stack, value);
+		}
+		else if (expression[i] == '+' || expression[i] == '*')
+		{
+			push(&operator_index_stack, i);
+			i++;
+		}
+		else if (expression[i] == '(')
+		{
+			push(&operator_index_stack, i);
 			i++;
 		}
 		else if (expression[i] == ')')
@@ -44,10 +75,6 @@ void solveExpression(char* expression)
 			child_expression = (char*)malloc(child_expression_size * sizeof(char));
 			strncpy_s(child_expression, child_expression_size,
 				expression + expression_start + 1, child_expression_size - 1);
-		}
-		else
-		{
-			i++;
 		}
 	}
 }
