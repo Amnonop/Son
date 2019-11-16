@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <windows.h>
+#include "stack.h"
 
 #define TIMEOUT_IN_MILLISECONDS 5000
 #define BRUTAL_TERMINATION_CODE 0x55
@@ -16,15 +17,14 @@ int main(int argc, char** argv)
 	
 	solveExpression(expression);
 	
-	return 1;
+	return 0;
 }
 
 void solveExpression(char* expression)
 {
-	int braket_stack[256];
+	node_t* bracket_index_stack = NULL;
 
 	int i = 0;
-	int stack_index = -1;
 	int expression_start = 0;
 	int expression_end = 0;
 	char* child_expression = NULL;
@@ -33,14 +33,12 @@ void solveExpression(char* expression)
 	{
 		if (expression[i] == '(')
 		{
-			stack_index++;
-			braket_stack[stack_index] = i;
+			push(&bracket_index_stack, i);
 			i++;
 		}
 		else if (expression[i] == ')')
 		{
-			expression_start = braket_stack[stack_index];
-			stack_index--;
+			expression_start = pop(&bracket_index_stack);
 			expression_end = i;
 			child_expression_size = expression_end - expression_start;
 			child_expression = (char*)malloc(child_expression_size * sizeof(char));
@@ -54,7 +52,10 @@ void solveExpression(char* expression)
 	}
 }
 
+char* solveSimpleExpression(char* expression)
+{
 
+}
 
 int CreateProcessSimpleMain(char* expression)
 {
