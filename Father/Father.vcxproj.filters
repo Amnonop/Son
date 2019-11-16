@@ -21,9 +21,15 @@
     <ClCompile Include="stack.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="expressionEvaluation.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stack.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="expressionEvaluation.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
