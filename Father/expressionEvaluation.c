@@ -4,6 +4,7 @@
 #include <windows.h>
 #include "stack.h"
 #include "expressionEvaluation.h"
+#include "file.h"
 
 #define TIMEOUT_IN_MILLISECONDS 5000
 #define BRUTAL_TERMINATION_CODE 0x55
@@ -12,6 +13,7 @@ BOOL CreateProcessSimple(LPTSTR CommandLine, PROCESS_INFORMATION *ProcessInfoPtr
 int CreateProcessSimpleMain(char* expression);
 void solveExpression(char* expression);
 int handleSimpleExpression(char* expression, node_t** values_stack, node_t** operator_index_stack);
+char* buildLogString(char* expression, int expression_start, int result, int expression_end);
 
 int getNumber(char* expression, int start_index, int end_index)
 {
@@ -44,6 +46,11 @@ void solveExpression(char* expression)
 
 	int child_expression_result = 0;
 
+	int solution_step_start = 0;
+	char* solution_step_string;
+
+	openFile("result_file.txt");
+
 	while (expression[i] != '\0')
 	{
 		if (expression[i] >= '0' && expression[i] <= '9')
@@ -68,13 +75,13 @@ void solveExpression(char* expression)
 			{
 				// Solve simple expression
 				child_expression_result = handleSimpleExpression(expression, &values_stack, &operator_index_stack);
-
 				push(&values_stack, child_expression_result);
 			}
-			pop(&operator_index_stack);
+			solution_step_start = pop(&operator_index_stack);
 
 			// Print solved expression
-
+			solution_step_string = buildLogString(expression, solution_step_start, child_expression_result, i + 1);
+			appendToFile("result_file.txt", solution_step_string);
 			i++;
 		}
 	}
@@ -93,6 +100,26 @@ int handleSimpleExpression(char* expression, node_t** values_stack, node_t** ope
 	sprintf_s(operand_string, 32, "%d%c%d", first_operand, operator, second_operand);
 
 	return CreateProcessSimpleMain(operand_string);
+}
+
+char* buildLogString(char* expression, int expression_start, int result, int expression_end)
+{
+	char expression_first_part[256];
+	char expression_last_part[256];
+	char sub_solution[256];
+	char result_string[256];
+
+	strncpy_s(expression_first_part, 256, expression, expression_start);
+	strcat_s(sub_solution, 256, expression_first_part);
+
+	sprintf_s(result_string, 256, "%d", result);
+	strcat_s(sub_solution, 256, result_string);
+
+	strncpy_s(expression_last_part, 256, expression + expression_end, strlen(expression) - expression_end - 1);
+	strcat_s(sub_solution, 256, expression_last_part);
+	strcat_s(sub_solution, 256, "\n");
+
+	return sub_solution;
 }
 
 int CreateProcessSimpleMain(char* expression)
