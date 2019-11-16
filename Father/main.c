@@ -10,6 +10,7 @@
 BOOL CreateProcessSimple(LPTSTR CommandLine, PROCESS_INFORMATION *ProcessInfoPtr);
 int CreateProcessSimpleMain(char* expression);
 void solveExpression(char* expression);
+int handleSimpleExpression(char* expression, node_t** values_stack, node_t** operator_index_stack);
 
 int main(int argc, char** argv)
 {
@@ -18,6 +19,18 @@ int main(int argc, char** argv)
 	solveExpression(expression);
 	
 	return 0;
+}
+
+int getNumber(char* expression, int start_index, int end_index)
+{
+	int number_string_length = end_index - start_index + 1;
+	char* number_string = (char*)malloc(number_string_length * sizeof(char));
+	strncpy_s(number_string, number_string_length,
+		expression + start_index, number_string_length - 1);
+	int value = (int)strtol(number_string, (char **)NULL, 10);
+	free(number_string);
+
+	return value;
 }
 
 void solveExpression(char* expression)
@@ -31,8 +44,6 @@ void solveExpression(char* expression)
 	int expression_length = strlen(expression);
 
 	int number_start_index = 0;
-	int number_length = 0;
-	char* number_string = NULL;
 	int value = 0;
 
 	char operator = ' ';
@@ -41,34 +52,19 @@ void solveExpression(char* expression)
 
 	int child_expression_result = 0;
 
-	int expression_start = 0;
-	int expression_end = 0;
-	char* child_expression = NULL;
-	int child_expression_size = 0;
-
 	while (expression[i] != '\0')
 	{
 		if (expression[i] >= '0' && expression[i] <= '9')
 		{
 			number_start_index = i;
 			while (i < expression_length && expression[i] >= '0' && expression[i] <= '9')
-			{
 				i++;
-			}
-			number_length = i - number_start_index;
-			number_string = (char*)malloc(number_length * sizeof(char));
-			strncpy_s(number_string, number_length, 
-				expression + number_start_index, number_length - 1);
-			value = (int)strtol(number_string, (char **)NULL, 10);
-			free(number_string);
+			
+			value = getNumber(expression, number_start_index, i);
+
 			push(&values_stack, value);
 		}
-		else if (expression[i] == '+' || expression[i] == '*')
-		{
-			push(&operator_index_stack, i);
-			i++;
-		}
-		else if (expression[i] == '(')
+		else if (expression[i] == '(' || expression[i] == '+' || expression[i] == '*')
 		{
 			push(&operator_index_stack, i);
 			i++;
@@ -78,20 +74,33 @@ void solveExpression(char* expression)
 			// Closing brace encountered, solve entire brace
 			while (expression[peek(operator_index_stack)] != '(')
 			{
-				operator = expression[pop(operator_index_stack)];
-				first_operand = pop(values_stack);
-				second_operand = pop(values_stack);
 				// Solve simple expression
+				child_expression_result = handleSimpleExpression(expression, &values_stack, &operator_index_stack);
 
-				push(values_stack, child_expression_result);
+				push(&values_stack, child_expression_result);
 			}
+			pop(&operator_index_stack);
+
+			// Print solved expression
+
+			i++;
 		}
 	}
+
+	// Top of values_stack contains result
+	printf("%d", pop(&values_stack));
 }
 
-char* solveSimpleExpression(char* expression)
+int handleSimpleExpression(char* expression, node_t** values_stack, node_t** operator_index_stack)
 {
+	char operator = expression[pop(operator_index_stack)];
+	int first_operand = pop(values_stack);
+	int second_operand = pop(values_stack);
 
+	char operand_string[32];
+	sprintf_s(operand_string, 32 ,"%d%c%d", first_operand, operator, second_operand);
+
+	return CreateProcessSimpleMain(operand_string);
 }
 
 int CreateProcessSimpleMain(char* expression)
@@ -101,12 +110,14 @@ int CreateProcessSimpleMain(char* expression)
 	DWORD				exitcode;
 	BOOL				retVal;
 	CHAR				process_name[] = ("Son.exe ");
-	int command_length = strlen(expression) + strlen(process_name) + 1;
-	char*				command = (char*)malloc(sizeof(char)*command_length);
-	strcpy_s(command, command_length, process_name);
-	strcat_s(command, command_length, expression);
-	retVal = CreateProcessSimple(command, &procinfo);
+	int command_length = strlen(expression) + strlen(process_name) + 2;
+	char* command = (char*)malloc(sizeof(char)*command_length);
 
+	sprintf_s(command, command_length, "Son.exe %s", expression);
+	
+	//strcpy_s(command, command_length, process_name);
+	//strcat_s(command, command_length, expression);
+	retVal = CreateProcessSimple(command, &procinfo);
 
 	if (retVal == 0)
 	{
