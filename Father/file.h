@@ -2,8 +2,8 @@
 #define FILE_H
 
 
-void openFile(void);
-void appendToFile(void);
+void openFile(const char* file_path,char* full_expression);
+void appendToFile(const char* file_path, char* sub_solution);
 
 
 #endif // !FILE_H
