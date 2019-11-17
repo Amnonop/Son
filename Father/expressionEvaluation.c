@@ -13,7 +13,9 @@ BOOL CreateProcessSimple(LPTSTR CommandLine, PROCESS_INFORMATION *ProcessInfoPtr
 int CreateProcessSimpleMain(char* expression);
 void solveExpression(char* expression);
 int handleSimpleExpression(char* expression, node_t** values_stack, node_t** operator_index_stack);
-void buildLogString(char* destination, char* expression, int expression_start, int result, int expression_end);
+char* buildLogString(char* expression, int expression_start, int result, int expression_end);
+int isExpressionSolved(char* expression);
+char* solveStep(char* expression);
 
 int getNumber(char* expression, int start_index, int end_index)
 {
@@ -29,66 +31,56 @@ int getNumber(char* expression, int start_index, int end_index)
 
 void solveExpression(char* expression)
 {
-	node_t* bracket_index_stack = NULL;
-
-	node_t* values_stack = NULL;
-	node_t* operator_index_stack = NULL;
-
-	int i = 0;
-	int expression_length = strlen(expression);
-
-	int number_start_index = 0;
-	int value = 0;
-
-	char operator = ' ';
-	int first_operand = 0;
-	int second_operand = 0;
-
-	int child_expression_result = 0;
-
-	int solution_step_start = 0;
-	char solution_step_string[256] = "";
-
-	openFile("result_file.txt", expression);
-
-	while (expression[i] != '\0')
+	char* solved_step;
+	char* solution_step = (char*)malloc(sizeof(char) * (strlen(expression) + 1));
+	strcpy_s(solution_step, strlen(solution_step), expression);
+	
+	openFile("result_file.txt", solution_step);
+	
+	while (!isExpressionSolved(solution_step))
 	{
-		if (expression[i] >= '0' && expression[i] <= '9')
-		{
-			number_start_index = i;
-			while (i < expression_length && expression[i] >= '0' && expression[i] <= '9')
-				i++;
+		solved_step = solveStep(solution_step);
 
-			value = getNumber(expression, number_start_index, i);
+		free(solution_step);
+		solution_step = (char*)malloc(sizeof(char) * (strlen(solved_step) + 1));
+		//strcpy_s(solution_step, strlen(solution_step), solved_step);
+		//free(solved_step);
 
-			push(&values_stack, value);
-		}
-		else if (expression[i] == '(' || expression[i] == '+' || expression[i] == '*')
-		{
-			push(&operator_index_stack, i);
-			i++;
-		}
-		else if (expression[i] == ')')
-		{
-			// Closing brace encountered, solve entire brace
-			while (expression[peek(operator_index_stack)] != '(')
-			{
-				// Solve simple expression
-				child_expression_result = handleSimpleExpression(expression, &values_stack, &operator_index_stack);
-				push(&values_stack, child_expression_result);
-			}
-			solution_step_start = pop(&operator_index_stack);
-
-			// Print solved expression
-			buildLogString(solution_step_string ,expression, solution_step_start, child_expression_result, i + 1);
-			appendToFile("result_file.txt", solution_step_string);
-			
-			i++;
-		}
+		appendToFile("result_file.txt", solution_step);
 	}
 
-	// Top of values_stack contains result
-	printf("%d", pop(&values_stack));
+}
+
+int isExpressionSolved(char* expression)
+{
+	return expression[0] != '(';
+}
+
+char* solveStep(char* expression)
+{
+	char* solution_step_string;
+	int open_brace_index = 0;
+	char* simple_expression;
+	int simple_expression_length = 0;
+	int result = 0;
+	int i = 0;
+
+	while (expression[i] != ')')
+	{
+		if (expression[i] == '(')
+			open_brace_index = i;
+		
+		i++;
+	}
+
+	simple_expression_length = i - open_brace_index;
+	simple_expression = (char*)malloc(sizeof(char) * simple_expression_length);
+	strncpy_s(simple_expression, simple_expression_length, expression + open_brace_index + 1, simple_expression_length - 1);
+	result = CreateProcessSimpleMain(simple_expression);
+	free(simple_expression);
+
+	solution_step_string = buildLogString(expression, open_brace_index, result, i + 1);
+	return solution_step_string;
 }
 
 int handleSimpleExpression(char* expression, node_t** values_stack, node_t** operator_index_stack)
@@ -103,21 +95,28 @@ int handleSimpleExpression(char* expression, node_t** values_stack, node_t** ope
 	return CreateProcessSimpleMain(operand_string);
 }
 
-void buildLogString(char* destination, char* expression, int expression_start, int result, int expression_end)
+char* buildLogString(char* expression, int expression_start, int result, int expression_end)
 {
+	char* destination;
 	char expression_first_part[256];
 	char expression_last_part[256];
 	char result_string[256];
 
-	strncpy_s(expression_first_part, 256, expression, expression_start);
-	strcat_s(destination, 256, expression_first_part);
-
 	sprintf_s(result_string, 256, "%d", result);
-	strcat_s(destination, 256, result_string);
+	
+	int length = expression_start + strlen(result_string) + (strlen(expression) - expression_end) + 2;
+	destination = (char*)malloc(sizeof(char) * length);
+
+	//strncpy_s(expression_first_part, 256, expression, expression_start);
+	strncpy_s(destination, length, expression, expression_start);
+	
+	strcat_s(destination, length, result_string);
 
 	strncpy_s(expression_last_part, 256, expression + expression_end, strlen(expression) - expression_end);
-	strcat_s(destination, 256, expression_last_part);
-	strcat_s(destination, 256, "\n");
+	strcat_s(destination, length, expression_last_part);
+	strcat_s(destination, length, "\n");
+
+	return destination;
 }
 
 int CreateProcessSimpleMain(char* expression)
