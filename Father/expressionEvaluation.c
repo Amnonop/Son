@@ -29,8 +29,15 @@ int getNumber(char* expression, int start_index, int end_index)
 	return value;
 }
 
+void swap(char** source, char** target)
+{
+	char* temp = *source;
+	*target = *source;
+}
+
 void solveExpression(char* expression)
 {
+	FILE *fp;
 	char* solved_step;
 	char* solution_step = (char*)malloc(sizeof(char) * (strlen(expression) + 1));
 	strcpy_s(solution_step, strlen(solution_step), expression);
@@ -40,13 +47,15 @@ void solveExpression(char* expression)
 	while (!isExpressionSolved(solution_step))
 	{
 		solved_step = solveStep(solution_step);
+		swap(&solved_step, &solution_step);
 
-		free(solution_step);
-		solution_step = (char*)malloc(sizeof(char) * (strlen(solved_step) + 1));
-		//strcpy_s(solution_step, strlen(solution_step), solved_step);
-		//free(solved_step);
-
-		appendToFile("result_file.txt", solution_step);
+		fopen_s(&fp, "result_file.txt", "a");
+		if (!fp) {
+			return 1;
+		}
+		fprintf(fp, "%s", solution_step);
+		fclose(fp);
+		//appendToFile("result_file.txt", solution_step);
 	}
 
 }
@@ -64,15 +73,12 @@ char* solveStep(char* expression)
 	int simple_expression_length = 0;
 	int result = 0;
 	int i = 0;
-
 	while (expression[i] != ')')
 	{
 		if (expression[i] == '(')
 			open_brace_index = i;
-		
 		i++;
 	}
-
 	simple_expression_length = i - open_brace_index;
 	simple_expression = (char*)malloc(sizeof(char) * simple_expression_length);
 	strncpy_s(simple_expression, simple_expression_length, expression + open_brace_index + 1, simple_expression_length - 1);
@@ -114,7 +120,7 @@ char* buildLogString(char* expression, int expression_start, int result, int exp
 
 	strncpy_s(expression_last_part, 256, expression + expression_end, strlen(expression) - expression_end);
 	strcat_s(destination, length, expression_last_part);
-	strcat_s(destination, length, "\n");
+	//strcat_s(destination, length, "\n");
 
 	return destination;
 }
