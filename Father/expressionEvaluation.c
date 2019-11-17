@@ -42,20 +42,21 @@ void solveExpression(char* expression)
 	char* solution_step = (char*)malloc(sizeof(char) * (strlen(expression) + 1));
 	strcpy_s(solution_step, strlen(solution_step), expression);
 	
-	openFile("result_file.txt", solution_step);
+	openFile("result_file.txt");
+	appendToFile("result_file.txt", solution_step);
 	
 	while (!isExpressionSolved(solution_step))
 	{
 		solved_step = solveStep(solution_step);
 		swap(&solved_step, &solution_step);
 
-		fopen_s(&fp, "result_file.txt", "a");
+		/*fopen_s(&fp, "result_file.txt", "a");
 		if (!fp) {
 			return 1;
 		}
 		fprintf(fp, "%s", solution_step);
-		fclose(fp);
-		//appendToFile("result_file.txt", solution_step);
+		fclose(fp);*/
+		appendToFile("result_file.txt", solution_step);
 	}
 
 }
