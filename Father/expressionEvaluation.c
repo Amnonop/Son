@@ -37,13 +37,13 @@ void swap(char** source, char** target)
 
 void solveExpression(char* expression)
 {
-	FILE *fp;
+	char* log_filename = "result_file.txt";
 	char* solved_step;
 	char* solution_step = (char*)malloc(sizeof(char) * (strlen(expression) + 1));
 	strcpy_s(solution_step, strlen(solution_step), expression);
 	
-	openFile("result_file.txt");
-	appendToFile("result_file.txt", solution_step);
+	openFile(log_filename);
+	appendToFile(log_filename, solution_step);
 	
 	while (!isExpressionSolved(solution_step))
 	{
@@ -56,7 +56,7 @@ void solveExpression(char* expression)
 		}
 		fprintf(fp, "%s", solution_step);
 		fclose(fp);*/
-		appendToFile("result_file.txt", solution_step);
+		appendToFile(log_filename, solution_step);
 	}
 
 }
